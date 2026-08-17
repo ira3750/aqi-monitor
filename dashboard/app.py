@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Use Streamlit secrets in production, .env locally
+DATABASE_URL = st.secrets.get("DATABASE_URL") or os.getenv("DATABASE_URL")
+
 
 # ── auto-refresh ───────────────────────────────────────────────────────────────
 st_autorefresh(interval=30 * 1000, key="aqi_refresh")
