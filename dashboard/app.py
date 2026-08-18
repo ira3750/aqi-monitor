@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import pandas as pd
 import plotly.graph_objects as go
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import os
 from dotenv import load_dotenv
 
@@ -13,17 +13,17 @@ DATABASE_URL = st.secrets.get("DATABASE_URL") if hasattr(st, "secrets") else Non
 if not DATABASE_URL:
     DATABASE_URL = os.getenv("DATABASE_URL")
 
-# ── page config ───
+# ── page config ──
 st.set_page_config(
     page_title="AQI Monitor",
     page_icon="🌬️",
     layout="wide",
 )
 
-# ── auto-refresh ──
+
 st_autorefresh(interval=30 * 1000, key="aqi_refresh")
 
-# ── AQI categories ───
+
 AQI_CATEGORIES = [
     (0,   50,  "Good",         "#2ecc71"),
     (51,  100, "Satisfactory", "#f1c40f"),
@@ -39,7 +39,7 @@ def get_category(aqi):
             return label, color
     return "Unknown", "#95a5a6"
 
-# ── data ──────────────────
+# ── data ─
 def get_connection():
     return psycopg2.connect(DATABASE_URL, sslmode="require")
 
@@ -75,7 +75,7 @@ def fetch_history(hours: int):
         st.error(f"Database connection failed: {e}")
         return pd.DataFrame()
 
-# ── css ───────────────────────
+# ── css ───────────────
 st.markdown("""
 <style>
     /* tighten default Streamlit padding */
@@ -85,24 +85,26 @@ st.markdown("""
     .dash-header {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
         margin-bottom: 1.25rem;
-        border-bottom: 1px solid #e0e0e0;
-        padding-bottom: 0.75rem;
+        background: #1a1a2e;
+        border-radius: 8px;
+        padding: 0.85rem 1.25rem;
     }
     .dash-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        letter-spacing: 0.01em;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
     }
     .dash-location {
         font-size: 0.85rem;
-        color: #666;
+        color: rgba(255,255,255,0.6);
     }
     .dash-updated {
         font-size: 0.8rem;
-        color: #999;
+        color: rgba(255,255,255,0.5);
     }
 
     /* AQI hero block */
@@ -183,11 +185,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ── fetch data ─────────────────
+# ── fetch data ──
 latest = fetch_latest()
 
-# ── header ────────────────────────────────────────────────────────────────────
-now_str = datetime.now(timezone.utc).strftime("%H:%M UTC")
+# ── header ─────
+IST = timezone(timedelta(hours=5, minutes=30))
+now_str = datetime.now(IST).strftime("%H:%M IST")
 location = "PG Girls Hostel, MNNIT Campus"   
 
 if latest and latest.get("recorded_at"):
@@ -208,14 +211,14 @@ else:
 st.markdown(f"""
 <div class="dash-header">
     <div>
-        <span class="dash-title">🌬️ Air Quality Monitor</span>
+        <span class="dash-title">Air Quality Monitor</span>
         <span class="dash-location" style="margin-left:0.75rem;">📍 {location}</span>
     </div>
     <span class="dash-updated">{updated_str} &nbsp;·&nbsp; {now_str}</span>
 </div>
 """, unsafe_allow_html=True)
 
-# ── no data state ─────────────
+# ── no data state ──────────
 if latest is None:
     st.markdown("""
     <div style="text-align:center; padding: 3rem; color: #999;">
@@ -228,7 +231,8 @@ if latest is None:
     """, unsafe_allow_html=True)
     st.stop()
 
-# ── AQI hero ──────────────────────────────────────────────────────────────────
+
+#aqi comments
 aqi = latest.get("aqi")
 
 AQI_DESCRIPTIONS = {
@@ -255,7 +259,7 @@ if aqi is not None:
 else:
     st.warning("AQI could not be computed for the latest reading.")
 
-# ── metric cards ───────────
+# ── metric cards ───────
 def fmt(val, decimals=1):
     return f"{val:.{decimals}f}" if val is not None else "—"
 
@@ -284,10 +288,10 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ── history section ────
+# ── history section ───────
 st.markdown('<div class="section-label">History</div>', unsafe_allow_html=True)
 
-# time range selector  buttons
+# time range selector as buttons
 RANGES = {"1 hr": 1, "6 hrs": 6, "24 hrs": 24, "7 days": 168}
 
 if "selected_range" not in st.session_state:
@@ -309,7 +313,7 @@ if df.empty:
     """, unsafe_allow_html=True)
     st.stop()
 
-# ── charts ─────────────────
+# ── charts ─────────────────────
 chart_height = 260
 col_left, col_right = st.columns(2)
 
