@@ -62,7 +62,7 @@ def fetch_history(hours: int):
     try:
         conn = get_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
-                cur.execute("""
+        cur.execute("""
             SELECT * FROM readings
             WHERE recorded_at >= now() - (%s * interval '1 hour')
             ORDER BY recorded_at ASC
