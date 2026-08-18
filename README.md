@@ -2,7 +2,7 @@
 
 Real-time air quality monitoring system built on an ESP32 with PMS5003 and DHT22 sensors. Reads PM2.5, PM10, temperature, and humidity every 30 seconds, computes AQI using the CPCB standard, and displays live and historical data on a web dashboard.
 
-**Live dashboard:** https://your-streamlit-url.streamlit.app
+**Live dashboard:** https://aqi-monitor-m55prumndugr5sfaxaypbm.streamlit.app/
 
 ---
 
@@ -12,13 +12,13 @@ Real-time air quality monitoring system built on an ESP32 with PMS5003 and DHT22
 [ESP32 + PMS5003 + DHT22]
         │  HTTPS POST every 30s
         ▼
-[FastAPI backend] — validates data, computes AQI
+[FastAPI backend]  (validates data and computes AQI)
         │  writes to
         ▼
-[PostgreSQL] — time-series readings
+[PostgreSQL] 
         │  reads from
         ▼
-[Streamlit dashboard] — live charts, auto-refresh
+[Streamlit dashboard] 
 ```
 
 ---
